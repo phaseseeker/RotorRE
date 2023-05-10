@@ -414,6 +414,42 @@
     [
       "a9826a1d-bc65-4571-8cab-85d8dffdbb66",
       ""
+    ],
+    [
+      "736ecf2c-df92-40a7-bf91-42343ce1ee35",
+      "Front panel"
+    ],
+    [
+      "f6eaf932-2f5c-4131-a58f-01a90387f1cf",
+      "Main"
+    ],
+    [
+      "41c1169c-f0b7-4254-ab3d-bac52ddece33",
+      "LCD_board"
+    ],
+    [
+      "d5ba8254-887d-4b7c-9ce3-90658cd9ddf1",
+      "LIOD interface"
+    ],
+    [
+      "53ff33aa-1b48-40a3-9909-eb25b7a61e13",
+      "67475"
+    ],
+    [
+      "7351fa49-eabe-4de7-ae95-ba2033d8b61e",
+      "67683"
+    ],
+    [
+      "1a19abe3-3711-4ee8-b605-0a5580c78499",
+      "67381"
+    ],
+    [
+      "d4d98476-9993-4d09-83dc-1c9f218ce557",
+      "67382"
+    ],
+    [
+      "c20c28b8-bc67-4518-bbd9-eda5c0d11c89",
+      "67384"
     ]
   ],
   "text_variables": {}
