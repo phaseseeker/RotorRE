@@ -1,0 +1,5 @@
+(sym_lib_table
+  (lib (name "az850p2-x")(type "KiCad")(uri "/home/paolo/KiCAD/Rotor/Rotor_kicad/az850p2-x.kicad_sym")(options "")(descr ""))
+  (lib (name "Generic")(type "KiCad")(uri "${KIPRJMOD}/Generic.kicad_sym")(options "")(descr ""))
+  (lib (name "HD6305Y2")(type "KiCad")(uri "${KIPRJMOD}/HD6305Y2.kicad_sym")(options "")(descr ""))
+)

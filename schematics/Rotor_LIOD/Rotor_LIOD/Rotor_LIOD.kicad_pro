@@ -303,33 +303,27 @@
     "rule_severities": {
       "bus_definition_conflict": "error",
       "bus_entry_needed": "error",
+      "bus_label_syntax": "error",
       "bus_to_bus_conflict": "error",
       "bus_to_net_conflict": "error",
-      "conflicting_netclasses": "error",
       "different_unit_footprint": "error",
       "different_unit_net": "error",
       "duplicate_reference": "error",
       "duplicate_sheet_names": "error",
-      "endpoint_off_grid": "warning",
       "extra_units": "error",
-      "global_label_dangling": "error",
+      "global_label_dangling": "warning",
       "hier_label_mismatch": "error",
       "label_dangling": "error",
       "lib_symbol_issues": "warning",
-      "missing_bidi_pin": "warning",
-      "missing_input_pin": "warning",
-      "missing_power_pin": "error",
-      "missing_unit": "warning",
       "multiple_net_names": "warning",
       "net_not_bus_member": "warning",
       "no_connect_connected": "warning",
       "no_connect_dangling": "warning",
       "pin_not_connected": "error",
       "pin_not_driven": "error",
-      "pin_to_pin": "error",
+      "pin_to_pin": "warning",
       "power_pin_not_driven": "error",
       "similar_labels": "warning",
-      "simulation_model_issue": "ignore",
       "unannotated": "error",
       "unit_value_mismatch": "error",
       "unresolved_variable": "error",
@@ -341,7 +335,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "Rotor_kicad.kicad_pro",
+    "filename": "Rotor_LIOD.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -385,8 +379,6 @@
   "schematic": {
     "annotate_start_num": 0,
     "drawing": {
-      "dashed_lines_dash_length_ratio": 12.0,
-      "dashed_lines_gap_length_ratio": 3.0,
       "default_line_thickness": 6.0,
       "default_text_size": 50.0,
       "field_names": [],
@@ -418,62 +410,14 @@
     "page_layout_descr_file": "",
     "plot_directory": "",
     "spice_adjust_passive_values": false,
-    "spice_current_sheet_as_root": false,
     "spice_external_command": "spice \"%I\"",
-    "spice_model_current_sheet_as_root": true,
-    "spice_save_all_currents": false,
-    "spice_save_all_voltages": false,
     "subpart_first_id": 65,
     "subpart_id_separator": 0
   },
   "sheets": [
     [
-      "a9826a1d-bc65-4571-8cab-85d8dffdbb66",
+      "4a63612f-df1f-4e14-97e7-35aed46eab3f",
       ""
-    ],
-    [
-      "736ecf2c-df92-40a7-bf91-42343ce1ee35",
-      "Front panel"
-    ],
-    [
-      "f6eaf932-2f5c-4131-a58f-01a90387f1cf",
-      "Main"
-    ],
-    [
-      "41c1169c-f0b7-4254-ab3d-bac52ddece33",
-      "LCD_board"
-    ],
-    [
-      "d5ba8254-887d-4b7c-9ce3-90658cd9ddf1",
-      "LIOD interface"
-    ],
-    [
-      "53ff33aa-1b48-40a3-9909-eb25b7a61e13",
-      "67475"
-    ],
-    [
-      "7351fa49-eabe-4de7-ae95-ba2033d8b61e",
-      "67683"
-    ],
-    [
-      "1a19abe3-3711-4ee8-b605-0a5580c78499",
-      "67381"
-    ],
-    [
-      "d4d98476-9993-4d09-83dc-1c9f218ce557",
-      "67382"
-    ],
-    [
-      "7fb3f5b9-0666-4f8d-b8c3-fa4c6ff711be",
-      "67384"
-    ],
-    [
-      "e647a812-aac7-47b4-87ef-5cfddd18fbed",
-      "67476"
-    ],
-    [
-      "09340320-1df6-4ba7-a732-2b52e06deba5",
-      "Main board"
     ]
   ],
   "text_variables": {}
