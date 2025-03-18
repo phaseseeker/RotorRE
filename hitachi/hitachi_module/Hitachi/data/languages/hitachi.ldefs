@@ -3,12 +3,12 @@
 <language_definitions>
   <language processor="HD6305Y2"
             endian="big"
-            size="14"
+            size="15"
             variant="default"
             version="1.0"
             slafile="hitachi.sla"
             processorspec="hitachi.pspec"
-            id="hd6305:BE:14:default">
+            id="hd6305:BE:15:default">
     <description>Hitachi HD6305Y2 microcontroller</description>
     <compiler name="default" spec="hitachi.cspec" id="default"/>
   </language>

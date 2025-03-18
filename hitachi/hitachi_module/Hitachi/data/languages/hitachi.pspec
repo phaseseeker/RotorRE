@@ -3,35 +3,35 @@
 <processor_spec>
   <programcounter register="PC"/>
   <volatile outputop="write" inputop="read">
-    <range space="mem" first="0x0" last="0x3FFF"/>
+    <range space="RAM" first="0x0" last="0x7FFF"/>
   </volatile>
 
-  <register_data>
-    <register name="A" group="Alt"/>
-    <register name="X" group="Alt"/>
-    <register name="SP" group="Alt"/>
-    <register name="CCR" group="Alt"/>
-  </register_data>
   <default_symbols>
-    <symbol name="PORTA" address="mem:0000"/>
-    <symbol name="PORTB" address="mem:0001"/>
-    <symbol name="PORTC" address="mem:0002"/>
-    <symbol name="PORTD" address="mem:0003"/>
-    <symbol name="DIRA" address="mem:0004"/>
-    <symbol name="DIRB" address="mem:0005"/>
-    <symbol name="DIRC" address="mem:0006"/>
-    <symbol name="TMRD" address="mem:0008"/>
-    <symbol name="TMRC" address="mem:0009"/>
-    <symbol name="MISC" address="mem:000A"/>
-    <symbol name="SCIC" address="mem:0010"/>
-    <symbol name="SCIS" address="mem:0011"/>
-    <symbol name="SCID" address="mem:0012"/>
+    <symbol name="PORTA" address="RAM:0000"/>
+    <symbol name="PORTB" address="RAM:0001"/>
+    <symbol name="PORTC" address="RAM:0002"/>
+    <symbol name="PORTD" address="RAM:0003"/>
+    <symbol name="DIRA" address="RAM:0004"/>
+    <symbol name="DIRB" address="RAM:0005"/>
+    <symbol name="DIRC" address="RAM:0006"/>
+    <symbol name="TMRD" address="RAM:0008"/>
+    <symbol name="TMRC" address="RAM:0009"/>
+    <symbol name="MISC" address="RAM:000A"/>
+    <symbol name="SCIC" address="RAM:0010"/>
+    <symbol name="SCIS" address="RAM:0011"/>
+    <symbol name="SCID" address="RAM:0012"/>
+    <symbol name="SCL_DATA" address="RAM:0022"/>
+    <symbol name="SCL_ADDR" address="RAM:0020"/>
+    <symbol name="SCL_CTRL" address="RAM:0021"/>
+    <symbol name="SCL_UNK_A" address="RAM:0023"/>
+    <symbol name="SCL_UNK_B" address="RAM:002A"/>
+    <symbol name="SCL_UNK_C" address="RAM:0034"/>
 
-    <symbol name="RES_ISR" address="mem:1FFE" entry="true" type="code_ptr"/>
-    <symbol name="SWI_ISR" address="mem:1FFC" entry="true" type="code_ptr"/>
-    <symbol name="INT_ISR" address="mem:1FFA" entry="true" type="code_ptr"/>
-    <symbol name="INT2_ISR" address="mem:1FF8" entry="true" type="code_ptr"/>
-    <symbol name="SCI_ISR" address="mem:1FF6" entry="true" type="code_ptr"/>
+    <symbol name="RES_ISR" address="RAM:1FFE" entry="true" type="code_ptr"/>
+    <symbol name="SWI_ISR" address="RAM:1FFC" entry="true" type="code_ptr"/>
+    <symbol name="INT_ISR" address="RAM:1FFA" entry="true" type="code_ptr"/>
+    <symbol name="INT2_ISR" address="RAM:1FF8" entry="true" type="code_ptr"/>
+    <symbol name="SCI_ISR" address="RAM:1FF6" entry="true" type="code_ptr"/>
   </default_symbols>
   <default_memory_blocks>
     <memory_block name="IO_TIMER" start_address="0x0000" length="0x021" initialized="true"/>

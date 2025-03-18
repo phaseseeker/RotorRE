@@ -49,11 +49,11 @@ OP1: imm16,X  	is op4_6=5 & X; imm16 	{ tmp:2 = imm16 + zext(X); export *:1 tmp;
 OP1: imm8,X   	is op4_6=6 & X; imm8  	{ tmp:2 = imm8 + zext(X); export *:1 tmp; }
 OP1: X			is op4_6=7 & X			{ tmp:2 = zext(X); export *:1 tmp; }
 
-ADDR: addr                      is op4_6=3; imm8 [ addr = ((inst_next & 0x4000) | imm8);]  { export *:1 addr; }
-ADDR: addr             is op4_6=4; imm16 [ addr = ((inst_next & 0x4000) | imm16);]      { export *:1 addr; }
-ADDRI: addr,X          is op4_6=5 & X; imm16 [ addr = ((inst_next & 0x4000) | imm16);]  { tmp:2 = addr + zext(X); export tmp; }
-ADDRI: addr,X           is op4_6=6 & X; imm8 [ addr = ((inst_next & 0x4000) | imm8);]   { tmp:2 = addr + zext(X); export tmp; }
-ADDRI: addr,X                        is op4_6=7 & X [ addr = (inst_next & 0x4000);]  { tmp:2 = zext(X) + addr; export tmp; }
+ADDR: addr 		is op4_6=3; imm8 [ addr = ((bank << 14) | imm8); ]		{ export *:1 addr; }
+ADDR: addr 		is op4_6=4; imm16 [ addr = ((bank << 14) | imm16); ]  	{ export *:1 addr; }
+ADDRI: addr,X  	is op4_6=5 & X; imm16 [ addr = ((bank << 14) | imm16); ]	{ tmp:2 = addr + zext(X); export tmp; }
+ADDRI: addr,X   	is op4_6=6 & X; imm8 [ addr = ((bank << 14) | imm8); ] 	{ tmp:2 = addr + zext(X); export tmp; }
+ADDRI: addr,X		is op4_6=7 & X [ addr = ((bank << 14) | X); ] 	{ tmp:2 = addr; export tmp; }
 
 
 DIRECT: imm8	is imm8					{ export *:1 imm8; }
@@ -153,7 +153,7 @@ DIRECT: imm8	is imm8					{ export *:1 imm8; }
 }
 
 :BANKCLR 0, DIRECT	is op4_7=1 & bit_0=1 & n=0; DIRECT & imm8=0x24
-	[bank=0; globalset(inst_next, bank);]{
+	[bank=0;]{
 	local mask = ~1;
 	contextreg = 0;
 	DIRECT = DIRECT & mask;
@@ -162,7 +162,7 @@ DIRECT: imm8	is imm8					{ export *:1 imm8; }
 }
 
 :BANKSET 0, DIRECT	is op4_7=1 & bit_0=0 & n=0; DIRECT & imm8=0x24
-	[bank=1; globalset(inst_next, bank);]{
+	[bank=1; ]{
 	local mask = 1;
 	DIRECT = DIRECT | mask;
 	tmp:2 = inst_next |0x4000;

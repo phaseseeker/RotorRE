@@ -1,0 +1,463 @@
+define endian=big;
+define alignment=1;
+
+define space mem type=ram_space size=2 default;
+define space register type=register_space size=1;
+
+define register offset=0     size=1 [A X CCR];
+define register offset=0x18  size=2 [PC _ SP _];
+define register offset=0x18  size=1 [PCH PCL SPH SPL];
+
+@define C "CCR[0,1]"
+@define Z "CCR[1,1]"
+@define N "CCR[2,1]"
+@define I "CCR[3,1]"
+@define H "CCR[4,1]"
+
+define token opcode (8)
+	op = (0,7)
+	hi = (4,7)
+	lo = (0,3)
+	bit = (1,3)
+	first = (7,7)
+	last = (0,0) 
+	rmw = (6,7)
+;
+define token data8 (8)
+	imm8 = (0,7)
+	rel8 = (0,7) signed
+;
+define token data16 (16)
+	imm16 = (0, 15)
+;
+
+macro pushINT() {
+	*:1 (SP) = PCL;
+	SP = SP-1;
+	local tmp:1 = PCH;
+	tmp[7,1] = 1;
+	tmp[6,1] = 1;
+	*:1 (SP) = tmp;
+	SP = SP-1;
+	*:1 (SP) = X;
+	SP = SP-1;
+	*:1 (SP) = A;
+	SP = SP-1;
+	tmp = CCR;
+	tmp[7,1] = 1;
+	tmp[6,1] = 1;
+	tmp[5,1] = 1;
+	*:1 (SP) = tmp;
+	SP = SP-1;
+}
+macro pushSUB() {
+	*:1 (SP) = PCL;
+	SP = SP-1;
+	local tmp:1 = PCH;
+	tmp[7,1] = 1;
+	tmp[6,1] = 1;
+	*:1 (SP) = tmp;
+	SP = SP-1;
+}
+macro popINT() {
+	SP = SP+1;
+	local tmp = *:1 SP;	
+ 	CCR = tmp[0, 4];
+	SP = SP+1;
+	A = *:1 SP;
+	SP = SP+1;
+	X = *:1 SP;
+}
+macro popSUB() {
+}
+macro NZflags(value) {
+	$(Z) = (value == 0);
+	$(N) = (value s< 0);
+}
+
+######### OPERANDS #########
+# Branch instructions #
+
+#Relative
+REL: reloc is rel8 [reloc = inst_next+rel8;] {export *:2 reloc;}
+
+# Register/memory #
+
+#Immediate
+OP1: "#"imm8	is hi=0xA; imm8		{tmp:1 = imm8; export tmp;}
+#Direct ("zero page")
+OP1: imm8	is hi=0xB; imm8		{export *:1 imm8;}
+#Extended
+OP1: imm16	is hi=0xC; imm16	{export *:1 imm16;}
+#Indexed (16 bit offset)
+OP1: imm16,X	is hi=0xD & X; imm16	{tmp:2 = imm16+zext(X); export *:1 tmp;}
+#Indexed (8 bit offset)
+OP1: imm8,X	is hi=0xE & X; imm8	{tmp:2 = zext(imm8+X); export *:1 tmp;}
+#Indexed (No offset)
+OP1: 0,X	is hi=0xF & X		{export *:1 X;}
+
+# Read/modify/write #
+
+#Implied (A)
+OP2: A		is hi=0x4 & A		{export A;}
+#Implied (X)
+OP2: X		is hi=0x5 & X		{export X;}
+#Direct
+OP2: imm8	is hi=0x3; imm8		{export *:1 imm8;}
+#Indexed (No offset)
+OP2: 0,X	is hi=0x7 & X		{export *:1 X;}
+#Indexed (8 bit offset)
+OP2: imm8, X	is hi=0x6 &X; imm8	{tmp:2 = zext(imm8+X); export *:1 tmp;}
+
+# Bit manipulation #
+
+ADDR8: imm8	is imm8			{export *:1 imm8;}
+
+######## INSTRUCTIONS ########
+
+# Register/memory
+
+:LDA OP1	is (lo=6 & first=1) 	... &OP1
+{
+	A = OP1;
+	NZflags(A);
+}
+:LDX OP1	is (lo=0xE & first=1) 	... &OP1
+{
+	X = OP1;
+	NZflags(X);
+}
+:STA OP1	is (lo=0x7 & first=1) 	... &OP1
+{
+	NZflags(A);
+	OP1 = A;
+}
+:STX OP1	is (lo=0xF & first=1)	... &OP1
+{
+	NZflags(X);
+	OP1 = X;
+}
+:ADD OP1	is (lo=0xB & first=1)	... &OP1
+{
+	A = A+OP1;
+	$(C) = carry(A, OP1);
+	$(H) = (((A&0b1111) + (OP1&0b1111)) & (0b10000)) != 0; # stolen from the Z80 file
+	NZflags(A);
+}
+:ADC OP1	is (lo=0x9 & first=1) 	... &OP1
+{
+	local tmpC = $(C);
+	$(H) = (((A&0b1111) + (OP1&0b1111) + tmpC) & (0b10000)) != 0; # stolen from the Z80 file
+	local tmpR = OP1 + A;
+	$(C) = carry(OP1, A);
+	$(C) = carry(tmpR, tmpC) || $(C);
+	A = tmpR + tmpC;
+	NZflags(A);
+}
+:SUB OP1	is (lo=0x0 & first=1)	... &OP1
+{
+	A = A - OP1;
+	$(C) = A < OP1;
+	NZflags(A);
+}
+:SBC OP1	is(lo=0x2 & first=1)	... &OP1
+{
+	local tmpC = $(C);
+	local tmpR = A - OP1;
+	$(C) = (A < OP1);
+	$(C) = (tmpR < tmpC) || $(C);
+	A = tmpR - tmpC;
+	NZflags(A);
+}
+:AND OP1	is(lo=0x4 & first=1)	... &OP1
+{
+	A = A & OP1;
+	NZflags(A);
+}
+:ORA OP1	is(lo=0xA & first=1) 	... &OP1
+{
+	A = A | OP1;
+	NZflags(A);
+}
+:EOR OP1	is(lo=0x8 & first=1)	... &OP1
+{
+	A = A ^ OP1;
+	NZflags(A);
+}
+:CMP OP1	is(lo=0x1 & first=1)	... &OP1
+{
+	local tmp = A - OP1;
+	$(C) = A < OP1;
+	NZflags(tmp);
+}
+:CPX OP1	is(lo=0x3 & first=1)	... &OP1
+{
+	local tmp = X - OP1;
+	$(C) = X < OP1;
+	NZflags(tmp);
+}
+:BIT OP1	is(lo=0x5 & first=1)	... &OP1
+{
+	local tmp = A & OP1;
+	NZflags(tmp);
+}
+:JMP OP1	is(lo=0xC & first=1)	... &OP1
+{
+	goto OP1;
+}
+:JSR OP1 	is(lo=0xD & first=1)	... &OP1
+{
+	PC = inst_next;
+	pushSUB();
+	call OP1;
+}
+
+# Read/modify/write #
+
+:INC OP2	is((lo=0xC & rmw = 1) | (op=0x3C)) ... &OP2
+{
+	OP2 = OP2 + 1;
+	NZflags(OP2);
+}
+:DEC OP2	is((lo=0xA & rmw = 1) | (op=0x3A)) ... &OP2
+{
+	OP2 = OP2 - 1;
+	NZflags(OP2);
+}
+:CLR OP2	is((lo=0xF & rmw = 1) | (op=0x3F)) ... &OP2
+{
+	OP2 = 0;
+	NZflags(OP2);
+}
+:COM OP2	is((lo=0x3 & rmw = 1) | (op=0x33)) ... &OP2
+{
+	OP2 = ~OP2;
+	$(C) = 1;
+	NZflags(OP2);
+}
+:NEG OP2	is((lo=0x0 & rmw = 1) | (op=0x30)) ... &OP2
+{
+	$(C) = OP2 != 0;
+	OP2 = ~OP2;
+	OP2 = OP2+1;
+	NZflags(OP2);
+}
+:ROL OP2	is((lo=0x9 & rmw = 1) | (op=0x39)) ... &OP2
+{
+	local tmpC = $(C);
+	$(C) = OP2 >> 7;
+	local tmpR = OP2 << 1;
+	OP2 = tmpR | tmpC;
+	NZflags(OP2);
+}
+:ROR OP2	is((lo=0x6 & rmw = 1) | (op=0x36)) ... &OP2
+{
+	local tmpC = $(C) << 7;
+	$(C) = OP2 & 1;
+	local tmpR = OP2 >> 1;
+	OP2 = tmpR | tmpC;
+	NZflags(OP2);
+}
+:LSL OP2	is((lo=0x8 & rmw = 1) | (op=0x38)) ... &OP2
+{
+	$(C) = OP2 >> 7;
+	OP2 = OP2 << 1;
+	NZflags(OP2);
+}
+:LSR OP2	is((lo=0x4 & rmw = 1) | (op=0x34)) ... &OP2
+{
+	$(C) = OP2 & 1;
+	OP2 = OP2 >> 1;
+	NZflags(OP2);
+}
+:ASR OP2	is((lo=0x7 & rmw = 1) | (op=0x37)) ... &OP2
+{
+	$(C) = OP2 & 1;
+	local msb = OP2 >> 7;
+	OP2 = (OP2 >> 1) | msb;
+	NZflags(OP2);
+}
+:TST OP2	is((lo=0xD & rmw = 1) | (op=0x3D)) ... &OP2
+{
+	NZflags(OP2);
+}
+
+# Branch instructions #
+
+:BRA REL	is(op=0x20); REL
+{
+	goto REL;
+}
+:BRN REL	is(op=0x21); REL
+{
+}
+:BHI REL	is(op=0x22); REL
+{
+	if(($(C) + $(Z)) == 0) goto REL;
+}
+:BLS REL	is(op=0x23); REL
+{
+	if(($(C) + $(Z)) == 1) goto REL;
+}
+:BCC REL	is(op=0x24); REL
+{
+	if($(C) == 0) goto REL;
+}
+:BCS REL	is(op=0x25); REL
+{
+	if($(C) == 1) goto REL;
+}
+:BNE REL	is(op=0x26); REL
+{
+	if($(Z) == 0) goto REL;
+}
+:BEQ REL	is(op=0x27); REL
+{
+	if($(Z) == 1) goto REL;
+}
+:BHCC REL	is(op=0x28); REL
+{
+	if($(H) == 0) goto REL;
+}
+:BHCS REL	is(op=0x29); REL
+{
+	if($(H) == 1) goto REL;
+}
+:BPL REL	is(op=0x2A); REL
+{
+	if($(N) == 0) goto REL;
+}
+:BMI REL	is(op=0x2B); REL
+{
+	if($(N) == 1) goto REL;
+}
+:BMC REL	is(op=0x2C); REL
+{
+	if($(I) == 0) goto REL;
+}
+:BMS REL	is(op=0x2D); REL
+{
+	if($(I) == 1) goto REL;
+}
+:BIL REL	is(op=0x2E); REL
+{
+	goto REL;
+}
+:BIH REL	is(op=0x2F); REL
+{
+	goto REL;
+}
+:BSR REL	is(op=0xAD); REL
+{
+	PC = PC+2;
+	pushSUB();
+	goto REL;	
+}
+
+# Bit test/set #
+
+:BRSET bit,ADDR8,REL is (hi=0x00 & last=0x0 & bit); ADDR8; REL {
+	$(C) = (ADDR8 & (1 << (bit>>1))) != 0;
+	if($(C) == 1) goto REL;
+}
+:BRCLR bit,ADDR8,REL is (hi=0x00 & last=0x1 & bit); ADDR8; REL {
+	$(C) = (ADDR8 & (1 << (bit>>1))) != 0;
+	if($(C) == 0) goto REL;
+}
+:BSET bit,ADDR8 is (hi=0x01 & last=0x0 & bit); ADDR8 {
+	ADDR8 = ADDR8 | (1 << (bit >> 1));
+}
+:BCLR bit,ADDR8 is(hi=0x01 & last=0x1 & bit); ADDR8 {
+	ADDR8 = ADDR8 & ~((1 << (bit >> 1)));
+}
+
+# Control #
+
+:TAX		is(op=0x97) {
+	X = A;
+}
+:TXA		is(op=0x9F) {
+	A = X;
+}
+:SEC		is(op=0x99) {
+	$(C) = 1;
+}
+:CLC		is(op=0x98) {
+	$(C) = 0;
+}
+:SEI		is(op=0x9B) {
+	$(I) = 1;
+}
+:CLI		is(op=0x9A) {
+	$(I) = 0;
+}
+:SWI		is(op=0x83) {
+	PC = PC+1;
+	pushINT();
+	$(I) = 1;
+	local swiAddr:2 = 0x1FFC;
+	goto [*:2 swiAddr ];
+}
+:RTS		is(op=0x81) {
+	local tmp:2 = 0;
+	SP = SP+1;
+	tmp[8,6] = *:1 SP;
+	SP = SP+1;
+	tmp[0,8] = *:1 SP;
+	return [tmp];
+}
+:RTI		is(op=0x80) {
+	popINT();
+	local tmp:2 = 0;
+	SP = SP+1;
+	tmp[8,6] = *:1 SP;
+	SP = SP+1;
+	tmp[0,8] = *:1 SP;
+	return [tmp];
+}
+:RSP		is(op=0x9C) {
+	SP = 0xFF;
+}
+:NOP		is(op=0x9D) {
+}
+:DAA		is(op=0x8D) {
+	local high = A >> 4;
+	local low = A & 0xF;	
+	if($(H) == 1) goto <halfcarryset>;
+	if(high <= 0x9 & low <= 0x9) goto <case0>;
+	if(high <= 0x8 & low >= 0xA) goto <case1>;
+	if(high >= 0xA & low <= 0x9) goto <case2>;	
+	if(high >= 0x9 & low >= 0xA) goto <case3>;	
+	if(high <= 0x2 & low <= 0x9) goto <case2>;
+	if(high <= 0x2 & low >= 0xA) goto <case3>;
+
+	<case0>
+	$(C) = 0;
+	goto <exit>;
+
+	<case1>
+	A = A + 6;
+	$(C) = 0;
+	goto <exit>;
+
+	<case2>
+	A = A + 60;
+	$(C) = 1;
+	goto <exit>;
+
+	<case3>
+	A = A + 66;
+	$(C) = 1;	
+	goto <exit>;
+
+	<halfcarryset>
+	if(high <= 0x9 & low <= 0x3) goto <case1>;
+	if(high >= 0xA & low <= 0x3) goto <case3>;
+	if(high <= 0x3 & low <= 0x3) goto <case3>;
+
+	<exit>
+}
+:STOP		is(op=0x8E) {
+}
+:WAIT		is(op=0x8F) {
+}

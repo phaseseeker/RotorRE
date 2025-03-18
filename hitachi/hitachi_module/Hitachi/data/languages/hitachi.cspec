@@ -5,9 +5,9 @@
 	<pointer_size value="2" />
   </data_organization>
   <global>
-    <range space="mem"/>
+    <range space="RAM"/>
   </global>
-  <stackpointer register="SP" space="mem" growth="negative"/>
+  <stackpointer register="SP" space="RAM" growth="negative"/>
   <default_proto>
     <prototype name="__asmA" extrapop="2" stackshift="2" strategy="register">
       <input>
