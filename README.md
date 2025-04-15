@@ -11,3 +11,8 @@ Parts of the original manual (taken from the old Spaghetti Phreakers website) ca
 There's also some of the pictures I took of the internals in the "pics" folder.
 
 I DO have binary images of the ROMs for the boards I have, both for the phone and for the internal card reader. I won't post them here since it's still technically copyrighted code. All of the phone CPU boards in my possession are equipped with ROM version 1.11 from '91, while my card readers have two different FW revisions. Not 100% of the differences yet. I haven't worked on the newer "OV" revisions board yet and I don't plan to unless I absolutely have to.
+
+
+Collezione di file per il mio progetto di reverse engineering del telefono pubblico italiano Rotor 2 (prodotto da IPM)
+La documentazione in ITALIANO è contenuta nei file doc.pdf e documentazione.odt; parte dei manuali ufficiali Telecom/SIP/IPM sono disponibili nella cartella "manual"
+Attualmente il progetto è arrivato al punto che è possibile inizializzare il telefono ed utilizzarlo per ricevere/effettuare chiamate, come se fosse un Rotor 1; tutte le funzioni "avanzate" quali incasso monete, chiamate con schede ecc non sono ancora disponibili
